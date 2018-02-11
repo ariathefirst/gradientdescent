@@ -2,6 +2,7 @@ import os
 import random
 import sys
 import numpy as np
+from random import shuffle
 
 ## constants
 inputData = "mnist_2_vs_7/mnist_X_train.dat"
@@ -23,41 +24,47 @@ def main():
 	testX = np.loadtxt(xTestData)
 	testY = np.loadtxt(yTestData)
 	t = 0
-	w = np.zeros(len(xfile[0]))
-	training(w, xfile, yfile) # part 3a
+	wGD = np.zeros(len(xfile[0]))
+	training(wGD, xfile, yfile) # part 3a
 #	print(w)
 
-	success = predAccu(w, xfile, yfile, testX, testY) # part 3b
+	success = predAccu(wGD, testX, testY) # part 3b
 #	print (success) # tests accuracy for 3a/b
 
-	w = np.zeros(len(xfile[0])) # reinitializes weight
-	trainedW = SGD(w, xfile, yfile) # 3c: function to implement SGD on logistic regression
-	print(trainedW)
+	n = 50 # randomly choose n=500 data points from X
+	wSGD = np.zeros(len(xfile[0])) # reinitializes weight
+	trainedW = SGD(wSGD, n, xfile, yfile) # 3c: function to implement SGD on logistic regression
+	successSGD = predAccu(trainedW, testX, testY)
+#	print(trainedW)
+	print (successSGD)
+#	predAccuSGD(w, testX, testY)
 
-def SGD(w, xfile, yfile):
-	n = 500 # randomly choose n=500 data points from X
-	from random import shuffle
+def SGD(wSGD, n, xfile, yfile):
 	shuffle(xfile) # shuffle input/training vectors/data to stochastically choose N data points
 	shuffle(yfile) 
+	grad = 0;
 	for i in range(n):
 		ranX = random.choice(xfile)
 		ranY = random.choice(yfile)
-		w += learningRate * ranX * ranY / (1 + np.exp(ranX * np.dot(np.transpose(w), ranX)))
-	return w
+		grad = -1 * ranY * ranX / (1 + np.exp(ranX * np.dot(np.transpose(wSGD), ranX)))
+		wSGD -= learningRate * grad
+	return wSGD
 
-def training(w, xfile, yfile): 
+
+
+def training(wGD, xfile, yfile): 
 	for i in range(50): # random big number
-		grad = summation(w, xfile, yfile)/len(xfile) # compute the gradient
-		w += learningRate * grad
-	return w # updated weight
+		grad = summation(wGD, xfile, yfile)/len(xfile) # compute the gradient
+		wGD += learningRate * grad
+	return wGD # updated weight
 
-def summation(w, xfile, yfile): # summation in gradient
+def summation(wGD, xfile, yfile): # summation in gradient
 	sum = 0
 	for j in range(xfileSize): # i should go from 1
-		sum += xfile[j] * yfile[j] / (1 + np.exp(yfile[j] * np.dot(np.transpose(w), xfile[j])))
+		sum += xfile[j] * yfile[j] / (1 + np.exp(yfile[j] * np.dot(np.transpose(wGD), xfile[j])))
 	return sum
 
-def predAccu(w, xfile, yfile, testX, testY): # part 3b, sum of err divided by xfilelen
+def predAccu(w, testX, testY): # part 3b, sum of err divided by xfilelen
 	# for i in range(xfileSize):
 	# 	output[i] = np.dot(np.transpose(w), xfile[i])
 	# 	for j in range(output):
