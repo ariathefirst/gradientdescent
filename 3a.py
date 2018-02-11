@@ -23,63 +23,45 @@ def main():
 	yfile = np.loadtxt(expectedOutputData)
 	testX = np.loadtxt(xTestData)
 	testY = np.loadtxt(yTestData)
+
 	t = 0
 	wGD = np.zeros(len(xfile[0]))
-	training(wGD, xfile, yfile) # part 3a
-#	print(w)
-
+	iterations = 50
+	batch = len(xfile)
+	training(wGD, xfile, yfile, iterations, batch) # part 3a
 	success = predAccu(wGD, testX, testY) # part 3b
 #	print (success) # tests accuracy for 3a/b
 
-	n = 50 # randomly choose n=500 data points from X
+
+	n = 256 # randomly choose n=256 data points from X
+#	trainedW = SGD(wSGD, n, xfile, yfile) # 3c: function to implement SGD on logistic regression
+	np.random.shuffle(xfile) # shuffle input/training vectors/data to stochastically choose N data points
 	wSGD = np.zeros(len(xfile[0])) # reinitializes weight
-	trainedW = SGD(wSGD, n, xfile, yfile) # 3c: function to implement SGD on logistic regression
+	trainedW = trainingSGD(wSGD, xfile, yfile)
 	successSGD = predAccu(trainedW, testX, testY)
 #	print(trainedW)
 	print (successSGD)
 #	predAccuSGD(w, testX, testY)
 
-def SGD(wSGD, n, xfile, yfile):
-	shuffle(xfile) # shuffle input/training vectors/data to stochastically choose N data points
-	shuffle(yfile) 
-	grad = 0;
-	for i in range(n):
-		ranX = random.choice(xfile)
-		ranY = random.choice(yfile)
-		grad = -1 * ranY * ranX / (1 + np.exp(ranX * np.dot(np.transpose(wSGD), ranX)))
-		wSGD -= learningRate * grad
+def trainingSGD(wSGD, xfile, yfile):
+	batch = 256
+	iterations = 500
+	training(wSGD, xfile, yfile, iterations, batch) # part 3a
 	return wSGD
 
-
-
-def training(wGD, xfile, yfile): 
-	for i in range(50): # random big number
-		grad = summation(wGD, xfile, yfile)/len(xfile) # compute the gradient
+def training(wGD, xfile, yfile, iterations, batch): 
+	for i in range(iterations): # random big number
+		grad = summation(wGD, xfile, yfile, batch)/len(xfile) # compute the gradient
 		wGD += learningRate * grad
 	return wGD # updated weight
 
-def summation(wGD, xfile, yfile): # summation in gradient
-	sum = 0
-	for j in range(xfileSize): # i should go from 1
+def summation(wGD, xfile, yfile, batch): # summation in gradient
+	sum = 0.0
+	for j in range(batch): # i should go from 1
 		sum += xfile[j] * yfile[j] / (1 + np.exp(yfile[j] * np.dot(np.transpose(wGD), xfile[j])))
 	return sum
 
 def predAccu(w, testX, testY): # part 3b, sum of err divided by xfilelen
-	# for i in range(xfileSize):
-	# 	output[i] = np.dot(np.transpose(w), xfile[i])
-	# 	for j in range(output):
-	# 		if trainedOut[j] > 0:
-	# 			predictedVal[j] = 1
-	# 		elif trainedOut[i]:
-	# 			predictedVal[j] = -1
-	# for i in range(xfileSize):
-	# 	if predictedVal[i] >= 0:
-	# 		err[i] = 1
-	# 	elif predictedVal[i] < 0:
-	# 		err[i] = -1	
-	# 	errSum += err[i]
-	# accuracy = errSum / xfileSize
-	# return accuracy
 	hit = 0
 	for i in range(len(testX)):
 		trainedY = np.dot(np.transpose(w), testX[i])
@@ -89,11 +71,23 @@ def predAccu(w, testX, testY): # part 3b, sum of err divided by xfilelen
 			trainedY = -1
 		if trainedY == testY[i]:
 			hit += 1
-	hits = float(hit) / float(len(testX))
+	hits = hit / len(testX)
 	return hits
 
 if __name__ == "__main__":
     main()
+
+
+# def SGD(wSGD, n, xfile, yfile):
+# 	np.random.shuffle(xfile) # shuffle input/training vectors/data to stochastically choose N data points
+# 	grad = 0.0
+# 	for i in range(500): # sample n samples 500 times
+# 		for i in range(n):
+# 			ranX = random.choice(xfile)
+# 			ranY = yfile[i]
+# 			grad = -1 * ranY * ranX / (1 + np.exp(ranX * np.dot(np.transpose(wSGD), ranX)))
+# 			wSGD -= learningRate * grad
+# 	return wSGD
 
 
 
