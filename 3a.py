@@ -25,8 +25,25 @@ def main():
 	t = 0
 	w = np.zeros(len(xfile[0]))
 	training(w, xfile, yfile) # part 3a
+#	print(w)
+
 	success = predAccu(w, xfile, yfile, testX, testY) # part 3b
-	print (success)
+#	print (success) # tests accuracy for 3a/b
+
+	w = np.zeros(len(xfile[0])) # reinitializes weight
+	trainedW = SGD(w, xfile, yfile) # 3c: function to implement SGD on logistic regression
+	print(trainedW)
+
+def SGD(w, xfile, yfile):
+	n = 500 # randomly choose n=500 data points from X
+	from random import shuffle
+	shuffle(xfile) # shuffle input/training vectors/data to stochastically choose N data points
+	shuffle(yfile) 
+	for i in range(n):
+		ranX = random.choice(xfile)
+		ranY = random.choice(yfile)
+		w += learningRate * ranX * ranY / (1 + np.exp(ranX * np.dot(np.transpose(w), ranX)))
+	return w
 
 def training(w, xfile, yfile): 
 	for i in range(50): # random big number
